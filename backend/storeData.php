@@ -4,46 +4,55 @@ $username = "knzilewis";
 $password = "XaUfTpCfXtN2J5yHOtk3";
 $dbname = "knzilewis_db";
 
-//connect to db
+// Connect to db
 $conn = new mysqli($servername, $username, $password, $dbname);
 
+// Check connection
 if ($conn->connect_error) {
   die("Verbindung fehlgeschlagen: " . $conn->connect_error);
 }
 
-// store data in variables
-$userGroup = $_POST['userGroup'];
-$artverkehrsmittel = $_POST['verkehrsmittel'];
-
-// for user group: Beschäftigte + Dienstwege
-$zufuss = $_POST['ZuFuß'];
-$fahrrad = $_POST['Fahrrad']; 
-$eigenesfahrrad = $_POST['EigenemPKW']; 
-$dienstpkw = $_POST['Dienst-PKW']; 
-$motorrad= $_POST['Motorrad']; 
-$busbahn = $_POST['Bus&Bahn']; 
-
-// for user group : Beschäftigte + Dienstreise
-$schiff = $_POST['Schiff'];
-$bus = $_POST['Bus'];
-$bahn = $_POST['Bahn'];
-$flugzeug = $_POST['Flugzeug'];
-
-// for user group : all/studierende
-$pkw = $_POST['PKW'];
-$opnv = $_POST['ÖPNV/Bahn'];
-$parkride = $_POST['Park&Ride'];
+// Store data in variables and check for existing
+$userGroup = $_POST['userGroup'] ?? NULL;
+$verkehrsmittel = $_POST['verkehrsmittel'] ?? NULL;
+$zufuss = $_POST['ZuFuß'] !== '' ? $_POST['ZuFuß'] : 0.00;
+$fahrrad = $_POST['Fahrrad'] !== '' ? $_POST['Fahrrad'] : 0.00;
+$eigenesfahrrad = $_POST['EigenemPKW'] !== '' ? $_POST['EigenemPKW'] : 0.00;
+$dienstpkw = $_POST['Dienst-PKW'] !== '' ? $_POST['Dienst-PKW'] : 0.00;
+$motorrad = $_POST['Motorrad'] !== '' ? $_POST['Motorrad'] : 0.00;
+$busbahn = $_POST['Bus&Bahn'] !== '' ? $_POST['Bus&Bahn'] : 0.00;
+$schiff = $_POST['Schiff'] !== '' ? $_POST['Schiff'] : 0.00;
+$bus = $_POST['Bus'] !== '' ? $_POST['Bus'] : 0.00;
+$bahn = $_POST['Bahn'] !== '' ? $_POST['Bahn'] : 0.00;
+$flugzeug = $_POST['Flugzeug'] !== '' ? $_POST['Flugzeug'] : 0.00;
+$pkw = $_POST['PKW'] !== '' ? $_POST['PKW'] : 0.00;
+$opnv = $_POST['ÖPNV/Bahn'] !== '' ? $_POST['ÖPNV/Bahn'] : 0.00;
+$parkride = $_POST['Park&Ride'] !== '' ? $_POST['Park&Ride'] : 0.00;
 
 
-$sql = "INSERT INTO Verkehrsmittel(id, artverkehrsmittel_id, usergruppe_id, zufuss, fahrrad, eigenesfahrrad, dienstpkw, motorrad, busbahn, schiff, bus, bahn, flugzeug, pkw, opnv, parkride, fahrstrecke_pro_reise) VALUES ('$verkehrsmittel', '$userGroup', '$zufuss', '$fahrrad', '$eigenesfahrrad', '$dienstpkw', '$motorrad','$busbahn','$schiff', '$bus', '$bahn', '$flugzeug', '$pkw', '$opnv', '$parkride','')";
+
+$sql = "INSERT INTO Verkehrsmittel (artverkehrsmittel, usergruppe, zufuss, fahrrad, eigenesfahrrad, dienstpkw, motorrad, busbahn, schiff, bus, bahn, flugzeug, pkw, opnv, parkride) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 
-// verify if data is successful sended
-if ($conn->query($sql) === TRUE) {
-  echo "Daten erfolgreich in die Datenbank eingefügt";
-} else {
-  echo "Fehler beim Einfügen der Daten: " . $conn->error;
+$stmt = $conn->prepare($sql);
+
+
+if (!$stmt) {
+    // output the error if it's wrong
+    die("Erreur de préparation: " . $conn->error);
 }
 
-$conn->close();
+// bind the parameter 
+$stmt->bind_param("sssssssssssssss", $verkehrsmittel, $userGroup, $zufuss, $fahrrad, $eigenesfahrrad, $dienstpkw, $motorrad, $busbahn, $schiff, $bus, $bahn, $flugzeug, $pkw, $opnv, $parkride);
+
+// Execute the request
+if ($stmt->execute()) {
+    echo "Daten erfolgreich in die Datenbank eingefügt";
+} else {
+    echo "Fehler beim Einfügen der Daten: " . $stmt->error;
+}
+
+//ini_set('display_errors', 1);
+//error_reporting(E_ALL);
 ?>
+
