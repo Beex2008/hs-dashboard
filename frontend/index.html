@@ -6,7 +6,7 @@
 </head>
 <body>
 
-<form id="dynamicForm" action="storeData.php" method="POST">
+<form id="dynamicForm">
     <label for="userGroup">Usergruppe:</label>
     <select id="userGroup" name="userGroup">
         <option value="">Bitte wählen...</option>
@@ -74,7 +74,7 @@ function generateInputFields(fields) {
     return fields.map(field => `<input type="text" name="${field.replace(/\s/g, '')}" placeholder="${field}">`).join('');
 }
 
-/*function submitForm(event) {
+function submitForm(event) {
     event.preventDefault();
 
     const formData = new FormData(document.getElementById('dynamicForm'));
@@ -89,9 +89,9 @@ function generateInputFields(fields) {
         }
     };
     xhr.send(formData);
-}*/
+}
 
-//document.getElementById('dynamicForm').addEventListener('submit', submitForm);
+document.getElementById('dynamicForm').addEventListener('submit', submitForm);
 </script>
 
 </body>

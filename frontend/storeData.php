@@ -12,8 +12,7 @@ if ($conn->connect_error) {
   die("Verbindung fehlgeschlagen: " . $conn->connect_error);
 }
 
-// Store data in variables and check for existence
-// Store data in variables and check for existence, converting empty strings to NULL for decimal fields
+// Store data in variables and check for existing
 $userGroup = $_POST['userGroup'] ?? NULL;
 $verkehrsmittel = $_POST['verkehrsmittel'] ?? NULL;
 $zufuss = $_POST['ZuFuß'] !== '' ? $_POST['ZuFuß'] : 0.00;
@@ -31,7 +30,7 @@ $opnv = $_POST['ÖPNV/Bahn'] !== '' ? $_POST['ÖPNV/Bahn'] : 0.00;
 $parkride = $_POST['Park&Ride'] !== '' ? $_POST['Park&Ride'] : 0.00;
 
 
-// Préparez votre requête SQL. Assurez-vous que la syntaxe est correcte et que tous les noms de table et de colonne existent.
+
 $sql = "INSERT INTO Verkehrsmittel (artverkehrsmittel, usergruppe, zufuss, fahrrad, eigenesfahrrad, dienstpkw, motorrad, busbahn, schiff, bus, bahn, flugzeug, pkw, opnv, parkride) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 
@@ -39,29 +38,21 @@ $stmt = $conn->prepare($sql);
 
 
 if (!$stmt) {
-    // La préparation a échoué. Affichez ou enregistrez l'erreur.
+    // output the error if it's wrong
     die("Erreur de préparation: " . $conn->error);
 }
 
-// Maintenant que nous savons que $stmt est valide, liez les paramètres.
+// bind the parameter 
 $stmt->bind_param("sssssssssssssss", $verkehrsmittel, $userGroup, $zufuss, $fahrrad, $eigenesfahrrad, $dienstpkw, $motorrad, $busbahn, $schiff, $bus, $bahn, $flugzeug, $pkw, $opnv, $parkride);
 
-// Exécutez la déclaration préparée.
+// Execute the request
 if ($stmt->execute()) {
     echo "Daten erfolgreich in die Datenbank eingefügt";
 } else {
     echo "Fehler beim Einfügen der Daten: " . $stmt->error;
 }
 
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
-
-// Fermez l'instruction et la connexion.
-// $stmt->close();
-// $conn->close();
-
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+//ini_set('display_errors', 1);
+//error_reporting(E_ALL);
 ?>
 
