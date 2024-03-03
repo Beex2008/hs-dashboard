@@ -3,12 +3,12 @@
   <head>
     <meta charset="UTF-8">
     <title>co2 Fußabdruck</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>-->
 
   </head>
   <body>
 
-    <form id="dynamicForm" onsubmit="return submitForm()>
+    <form id="dynamicForm" onsubmit="return submitForm()">
       <label for="userGroup">Usergruppe:</label>
       <select id="userGroup" name="userGroup">
         <option value="">Bitte wählen...</option>
@@ -20,11 +20,14 @@
 
       <div id="secondDropdown"></div>
       <div id="additionalInputs"></div>
+   
+      <button id="submitBtn">Senden</button>
+
     </form>
 
-    <script src="Chart1.js">
+   <!-- <script src="Chart1.js">
       <canvas id="BarChart1"></canvas>
-    </script>
+   </script>-->
 
 
     <script>
@@ -90,24 +93,20 @@ event.preventDefault();
 // Collect form data
 const selectedData = new FormData(document.getElementById('dynamicForm'));
 
-// Create an XMLHttpRequest
 const xhr = new XMLHttpRequest();
-xhr.open("POST", "storeData.php", true);
-          xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+xhr.open("POST", "storeData.php", true);        
 
-// Set up a function to handle the response
 xhr.onreadystatechange = function() {
 if (this.readyState == 4 && this.status == 200) {
-// Handle response here. For example, alert the user.
 alert("Data stored successfully");
                                 }
    };
-// Send the form data
 xhr.send(selectedData);
 
-// Return false to prevent default form submission
 return false;
 }
+
+ document.getElementById('dynamicForm').addEventListener('submit', submitForm);
 
     </script>
 
