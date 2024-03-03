@@ -1,5 +1,6 @@
 ## Requirement
 > you need your database parameter </br>
+> The php script : *storeData.php* should be updated with your database parameter </br> 
 > execute the sql data with the command : *mysql < create* for creating the table Verkehrsmittel
 
 
