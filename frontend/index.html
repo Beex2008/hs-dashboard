@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8">
+    <title>co2 Fußabdruck</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  </head>
+  <body>
+
+    <form id="dynamicForm" onsubmit="return submitForm()>
+      <label for="userGroup">Usergruppe:</label>
+      <select id="userGroup" name="userGroup">
+        <option value="">Bitte wählen...</option>
+        <option value="Beschäftigte">Beschäftigte</option>
+        <option value="Studierende">Studierende</option>
+        <option value="Lehrbeauftragte">Lehrbeauftragte</option>
+        <option value="Alle">Alle</option>
+      </select>
+
+      <div id="secondDropdown"></div>
+      <div id="additionalInputs"></div>
+    </form>
+
+    <script src="Chart1.js">
+      <canvas id="BarChart1"></canvas>
+    </script>
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const userGroupSelect = document.getElementById('userGroup');
+
+userGroupSelect.addEventListener('change', function() {
+const userGroup = this.value;
+let secondDropdownContent = '';
+
+if (userGroup === 'Beschäftigte') {
+secondDropdownContent = `<label for="verkehrsmittel">Verkehrsmittel:</label>
+                                     <select id="verkehrsmittel" name="verkehrsmittel" onchange="updateAdditionalInputs('${userGroup}')">
+                                         <option value="">Bitte wählen...</option>
+                                         <option value="Dienstwege">Dienstwege</option>
+                                         <option value="Dienstreise">Dienstreise</option>
+                                         <option value="Täglicher Weg zur Hochschule">Täglicher Weg zur Hochschule</option>
+                                     </select>`;
+                                     } else if (userGroup === 'Studierende' || userGroup === 'Lehrbeauftragte' || userGroup === 'Alle') {
+                                     secondDropdownContent = `<label for="verkehrsmittel">Verkehrsmittel:</label>
+                                     <select id="verkehrsmittel" name="verkehrsmittel" onchange="updateAdditionalInputs('${userGroup}')">
+                                        <option value="">Bitte wählen...</option>
+                                        <option value="Täglicher Weg zur Hochschule" selected>Täglicher Weg zur Hochschule</option>
+                                     </select>`;
+                                     }
+
+document.getElementById('secondDropdown').innerHTML = secondDropdownContent;
+document.getElementById('additionalInputs').innerHTML = ''; // Bereinige zusätzliche Inputs
+});
+});
+
+function updateAdditionalInputs(userGroup) {
+const verkehrsmittelSelect = document.getElementById('verkehrsmittel');
+const verkehrsmittel = verkehrsmittelSelect.value;
+let additionalInputsContent = '';
+
+// Bedingungen für das Anzeigen zusätzlicher Inputs basierend auf der Auswahl
+if (userGroup === 'Beschäftigte' && verkehrsmittel === 'Dienstwege') {
+additionalInputsContent += generateInputFields(['Zu Fuß', 'Fahrrad', 'Eigenem PKW', 'Dienst-PKW', 'Motorrad', 'Bus & Bahn']);
+} else if (userGroup === 'Beschäftigte' && verkehrsmittel === 'Dienstreise') {
+additionalInputsContent += generateInputFields(['Eigener PKW', 'Dienst-PKW', 'Schiff', 'Bus', 'Bahn', 'Flugzeug']);
+} else if (userGroup === 'Alle' && verkehrsmittel === 'Täglicher Weg zur Hochschule') {
+additionalInputsContent += generateInputFields(['Zu Fuß', 'Fahrrad', 'PKW', 'Motorrad', 'ÖPNV/Bahn', 'Park & Ride']);
+} else if ((userGroup === 'Lehrbeauftragte' || userGroup === 'Studierende') && verkehrsmittel === 'Täglicher Weg zur Hochschule') {
+additionalInputsContent += generateInputFields(['Zu Fuß', 'Fahrrad', 'PKW', 'Motorrad', 'ÖPNV/Bahn', 'Park & Ride']);
+}
+
+document.getElementById('additionalInputs').innerHTML = additionalInputsContent;
+}
+
+function generateInputFields(fields) {
+return fields.map(field => `<input type="text" name="${field.replace(/\s/g, '')}" placeholder="${field}">`).join('');
+                                         }
+
+function submitForm() {
+const formData = {};
+// Sammeln Sie hier die Daten aus Ihrem Formular
+document.querySelectorAll('#dynamicForm input, #dynamicForm select').forEach(input => {
+formData[input.name] = input.value;
+});
+event.preventDefault();
+
+// Collect form data
+const selectedData = new FormData(document.getElementById('dynamicForm'));
+
+// Create an XMLHttpRequest
+const xhr = new XMLHttpRequest();
+xhr.open("POST", "storeData.php", true);
+          xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+
+// Set up a function to handle the response
+xhr.onreadystatechange = function() {
+if (this.readyState == 4 && this.status == 200) {
+// Handle response here. For example, alert the user.
+alert("Data stored successfully");
+                                }
+   };
+// Send the form data
+xhr.send(selectedData);
+
+// Return false to prevent default form submission
+return false;
+}
+
+    </script>
+
+  </body>
+</html>
+
