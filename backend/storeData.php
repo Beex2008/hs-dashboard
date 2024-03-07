@@ -74,15 +74,15 @@ if(!empty($req)){
   $result= $conn->query($req);
 
   // create an empty array
-  $data = [];
+  $data = array();
 
   if($result->num_rows >0){
     while($rows = $result->fetch_assoc()){
       $data[] = $rows;
     }
-
-    echo json_encode($data);
-
+   // echo $data
+   
+   echo json_encode($data);
   } 
   else {
     echo json_encode(['error' => 'Keine Ergebnisse gefunden']);
