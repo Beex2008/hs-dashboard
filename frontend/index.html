@@ -94,19 +94,22 @@ function submitForm(event) {
             document.getElementById("getVal").innerHTML= this.responseText;
            // alert("Data stored successfully");
             console.log("Data stored",this.responseText);
-            document.getElementById('myChart').innerHTML=drawChart(this.responseText);    
+           // document.getElementById('myChart').innerHTML=drawChart(this.responseText);    
+            drawChart(this.responseText);
         }
     };
     xhr.send(formData);
 }
 
 function drawChart(data){
+ 
   var responseData = JSON.parse(data);
 
   var xValues = [];
   var yValues = [];
   var barColors = [];
 
+ if (responseData.length > 0) {
   var dataItem = responseData[0]; 
   for (var key in dataItem) {
     if (dataItem.hasOwnProperty(key)) {
@@ -133,6 +136,9 @@ function drawChart(data){
     }
   }
 });
+}else {
+    console.log("No data available for the chart.");
+  }
 }
 
 document.getElementById('dynamicForm').addEventListener('submit', submitForm);
