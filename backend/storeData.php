@@ -1,4 +1,6 @@
 <?php
+header('Content-Type: application/json');
+
 $servername = "mysql-server";
 $username = "knzilewis";
 $password = "XaUfTpCfXtN2J5yHOtk3";
@@ -34,12 +36,13 @@ $parkride = $_POST['Park&Ride'] !== '' ? $_POST['Park&Ride'] : 0.00;
 $sql = "INSERT INTO Verkehrsmittel (artverkehrsmittel, usergruppe, zufuss, fahrrad, eigenesfahrrad, dienstpkw, motorrad, busbahn, schiff, bus, bahn, flugzeug, pkw, opnv, parkride) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 
+
 $stmt = $conn->prepare($sql);
 
 
 if (!$stmt) {
-    // output the error if it's wrong
-    die("Erreur de préparation: " . $conn->error);
+  // output the error if it's wrong
+  die("Erreur de préparation: " . $conn->error);
 }
 
 // bind the parameter 
@@ -47,12 +50,48 @@ $stmt->bind_param("sssssssssssssss", $verkehrsmittel, $userGroup, $zufuss, $fahr
 
 // Execute the request
 if ($stmt->execute()) {
-    echo "Daten erfolgreich in die Datenbank eingefügt";
+  echo "Daten erfolgreich in die Datenbank eingefügt";
 } else {
-    echo "Fehler beim Einfügen der Daten: " . $stmt->error;
+  echo "Fehler beim Einfügen der Daten: " . $stmt->error;
 }
 
-//ini_set('display_errors', 1);
-//error_reporting(E_ALL);
+
+$req = "";
+
+if ($userGroup === 'Alle' && $verkehrsmittel === 'Täglicher Weg zur Hochschule') {
+  // request about the dependence Usergruppe: all and täglicher Hs-Weg
+  $req = "SELECT zufuss AS 'Zu Fuss', fahrrad AS 'Fahrrad', pkw AS 'PKW', motorrad AS 'Motorrad', opnv AS 'OEPNV', parkride AS 'Park & Ride' FROM Verkehrsmittel ORDER BY id DESC LIMIT 1;";
+} elseif($userGroup === 'Beschäftigte' && $verkehrsmittel === 'Dienstwege') {
+  // request about the dependence Usergruppe: Beschäftigte and Dienstwege
+  $req = "SELECT zufuss AS 'Zu Fuss', fahrrad AS 'Fahrrad', eigenesfahrrad AS 'Eigenes-PKW', dienstpkw AS 'Dienst-PKW', motorrad AS 'Motorrad', busbahn AS 'Bus & Bahn' FROM Verkehrsmittel ORDER BY id DESC LIMIT 1;";
+} elseif ($userGroup === 'Beschäftigte' && $verkehrsmittel === 'Dienstreise') {
+  // request about the dependence Usergruppe: Beschäftigte and Dienstreise
+  $req = "SELECT eigenesfahrrad AS 'Eigenes-PKW', dienstpkw AS 'Dienst-PKW', schiff AS 'Schiff', bus AS 'Bus', bahn AS 'Bahn', flugzeug AS 'Flugzeug' FROM Verkehrsmittel ORDER BY id DESC LIMIT 1;";
+}
+
+
+if(!empty($req)){
+  $result= $conn->query($req);
+
+  // create an empty array
+  $data = [];
+
+  if($result->num_rows >0){
+    while($rows = $result->fetch_assoc()){
+      $data[] = $rows;
+    }
+
+    echo json_encode($data);
+
+  } 
+  else {
+    echo json_encode(['error' => 'Keine Ergebnisse gefunden']);
+    }
+} else {
+  echo json_encode(['error' => 'Keine Parameter']);
+}
+
+
+$conn->close();
 ?>
 
