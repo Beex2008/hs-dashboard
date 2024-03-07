@@ -2,7 +2,9 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>co2 Fußabdruck</title>
+    <title>Monitoring Fußabdruck</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+
 </head>
 <body>
 
@@ -21,6 +23,11 @@
 
     <button type="submit" id="submitBtn">Senden</button>
 </form>
+
+<div id="getVal">Display the values here! </div>
+
+<canvas id="myChart" width="400" height="500"></canvas>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -80,15 +87,52 @@ function submitForm(event) {
     const formData = new FormData(document.getElementById('dynamicForm'));
 
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", "storeData.php", true);
+    xhr.open("POST", "../backend/storeData.php", true);
 
     xhr.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
-            alert("Data stored successfully");
+            document.getElementById("getVal").innerHTML= this.responseText;
+           // alert("Data stored successfully");
             console.log("Data stored",this.responseText);
+            document.getElementById('myChart').innerHTML=drawChart(this.responseText);    
         }
     };
     xhr.send(formData);
+}
+
+function drawChart(data){
+  var responseData = JSON.parse(data);
+
+  var xValues = [];
+  var yValues = [];
+  var barColors = [];
+
+  var dataItem = responseData[0]; 
+  for (var key in dataItem) {
+    if (dataItem.hasOwnProperty(key)) {
+        xValues.push(key);
+        yValues.push(dataItem[key]);
+        barColors.push('rgba(0, 119, 204, 0.3)'); 
+    }
+  }
+  
+ //var ctx = document.getElementById('myChart').getContext('2d');
+  new Chart("myChart", {
+  type: "bar",
+  data: {
+    labels: xValues,
+    datasets: [{
+      backgroundColor: barColors,
+      data: yValues
+    }]
+  },
+  options: {
+    title: {
+      display: true,
+      text: "Beispiel"
+    }
+  }
+});
 }
 
 document.getElementById('dynamicForm').addEventListener('submit', submitForm);
