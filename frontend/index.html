@@ -1,43 +1,42 @@
 <!DOCTYPE html>
 <html lang="de">
-<head>
+  <head>
     <meta charset="UTF-8">
     <title>Monitoring Fußabdruck</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
 
-</head>
-<body>
+  </head>
+  <body>
 
-<form id="dynamicForm">
-    <label for="userGroup">Usergruppe:</label>
-    <select id="userGroup" name="userGroup">
+    <form id="dynamicForm">
+      <label for="userGroup">Usergruppe:</label>
+      <select id="userGroup" name="userGroup">
         <option value="">Bitte wählen...</option>
         <option value="Beschäftigte">Beschäftigte</option>
         <option value="Studierende">Studierende</option>
         <option value="Lehrbeauftragte">Lehrbeauftragte</option>
         <option value="Alle">Alle</option>
-    </select>
+      </select>
 
-    <div id="secondDropdown"></div>
-    <div id="additionalInputs"></div>
+      <div id="secondDropdown"></div>
+      <div id="additionalInputs"></div>
 
-    <button type="submit" id="submitBtn">Senden</button>
-</form>
+      <button type="submit" id="submitBtn">Senden</button>
+    </form>
 
-<div id="getVal">Display the values here! </div>
+    <div id="getVal">Display the values here! </div>
 
-<canvas id="myChart" width="400" height="500"></canvas>
+    <canvas id="myChart" style="width:100%;max-width:600px"></canvas>
 
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const userGroupSelect = document.getElementById('userGroup');
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const userGroupSelect = document.getElementById('userGroup');
+        userGroupSelect.addEventListener('change', function() {
+          const userGroup = this.value;
+          let secondDropdownContent = '';
 
-    userGroupSelect.addEventListener('change', function() {
-        const userGroup = this.value;
-        let secondDropdownContent = '';
-
-        if (userGroup === 'Beschäftigte') {
+          if (userGroup === 'Beschäftigte') {
             secondDropdownContent = `<label for="verkehrsmittel">Verkehrsmittel:</label>
                                      <select id="verkehrsmittel" name="verkehrsmittel" onchange="updateAdditionalInputs('${userGroup}')">
                                          <option value="">Bitte wählen...</option>
@@ -45,99 +44,117 @@ document.addEventListener('DOMContentLoaded', function() {
                                          <option value="Dienstreise">Dienstreise</option>
                                          <option value="Täglicher Weg zur Hochschule">Täglicher Weg zur Hochschule</option>
                                      </select>`;
-        } else if (userGroup === 'Studierende' || userGroup === 'Lehrbeauftragte' || userGroup === 'Alle') {
+          } else if (userGroup === 'Studierende' || userGroup === 'Lehrbeauftragte' || userGroup === 'Alle') {
             secondDropdownContent = `<label for="verkehrsmittel">Verkehrsmittel:</label>
                                      <select id="verkehrsmittel" name="verkehrsmittel" onchange="updateAdditionalInputs('${userGroup}')">
                                         <option value="">Bitte wählen...</option>
                                         <option value="Täglicher Weg zur Hochschule">Täglicher Weg zur Hochschule</option>
                                      </select>`;
+          }
+
+          document.getElementById('secondDropdown').innerHTML = secondDropdownContent;
+          document.getElementById('additionalInputs').innerHTML = ''; // Clear additional inputs
+        });
+      });
+
+      function updateAdditionalInputs(userGroup) {
+        const verkehrsmittelSelect = document.getElementById('verkehrsmittel');
+        const verkehrsmittel = verkehrsmittelSelect.value;
+        let additionalInputsContent = '';
+
+        // Conditions for displaying additional inputs based on the selection
+        if (userGroup === 'Beschäftigte' && verkehrsmittel === 'Dienstwege') {
+          additionalInputsContent += generateInputFields(['Zu Fuß', 'Fahrrad', 'Eigenem PKW', 'Dienst-PKW', 'Motorrad', 'Bus & Bahn']);
+        } else if (userGroup === 'Beschäftigte' && verkehrsmittel === 'Dienstreise') {
+          additionalInputsContent += generateInputFields(['Eigener PKW', 'Dienst-PKW', 'Schiff', 'Bus', 'Bahn', 'Flugzeug']);
+        } else if (userGroup === 'Alle' && verkehrsmittel === 'Täglicher Weg zur Hochschule') {
+          additionalInputsContent += generateInputFields(['Zu Fuß', 'Fahrrad', 'PKW', 'Motorrad', 'ÖPNV/Bahn', 'Park & Ride']);
+        } else if ((userGroup === 'Lehrbeauftragte' || userGroup === 'Studierende') && verkehrsmittel === 'Täglicher Weg zur Hochschule') {
+          additionalInputsContent += generateInputFields(['Zu Fuß', 'Fahrrad', 'PKW', 'Motorrad', 'ÖPNV/Bahn', 'Park & Ride']);
         }
 
-        document.getElementById('secondDropdown').innerHTML = secondDropdownContent;
-        document.getElementById('additionalInputs').innerHTML = ''; // Clear additional inputs
-    });
-});
-
-function updateAdditionalInputs(userGroup) {
-    const verkehrsmittelSelect = document.getElementById('verkehrsmittel');
-    const verkehrsmittel = verkehrsmittelSelect.value;
-    let additionalInputsContent = '';
-
-    // Conditions for displaying additional inputs based on the selection
-    if (userGroup === 'Beschäftigte' && verkehrsmittel === 'Dienstwege') {
-        additionalInputsContent += generateInputFields(['Zu Fuß', 'Fahrrad', 'Eigenem PKW', 'Dienst-PKW', 'Motorrad', 'Bus & Bahn']);
-    } else if (userGroup === 'Beschäftigte' && verkehrsmittel === 'Dienstreise') {
-        additionalInputsContent += generateInputFields(['Eigener PKW', 'Dienst-PKW', 'Schiff', 'Bus', 'Bahn', 'Flugzeug']);
-    } else if (userGroup === 'Alle' && verkehrsmittel === 'Täglicher Weg zur Hochschule') {
-        additionalInputsContent += generateInputFields(['Zu Fuß', 'Fahrrad', 'PKW', 'Motorrad', 'ÖPNV/Bahn', 'Park & Ride']);
-    } else if ((userGroup === 'Lehrbeauftragte' || userGroup === 'Studierende') && verkehrsmittel === 'Täglicher Weg zur Hochschule') {
-        additionalInputsContent += generateInputFields(['Zu Fuß', 'Fahrrad', 'PKW', 'Motorrad', 'ÖPNV/Bahn', 'Park & Ride']);
-    }
-
-    document.getElementById('additionalInputs').innerHTML = additionalInputsContent;
-}
-
-function generateInputFields(fields) {
-    return fields.map(field => `<input type="text" name="${field.replace(/\s/g, '')}" placeholder="${field}">`).join('');
-}
-
-function submitForm(event) {
-    event.preventDefault();
-
-    const formData = new FormData(document.getElementById('dynamicForm'));
-
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", "../backend/storeData.php", true);
-
-    xhr.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            document.getElementById("getVal").innerHTML= this.responseText;
-           // alert("Data stored successfully");
-            console.log("Data stored",this.responseText);
-            document.getElementById('myChart').innerHTML=drawChart(this.responseText);    
+          document.getElementById('additionalInputs').innerHTML = additionalInputsContent;
         }
-    };
-    xhr.send(formData);
-}
 
-function drawChart(data){
-  var responseData = JSON.parse(data);
+      function generateInputFields(fields) {
+        return fields.map(field => `<input type="text" name="${field.replace(/\s/g, '')}" placeholder="${field}">`).join('');
+      }
 
-  var xValues = [];
-  var yValues = [];
-  var barColors = [];
+      function submitForm(event) {
+        event.preventDefault();
 
-  var dataItem = responseData[0]; 
-  for (var key in dataItem) {
-    if (dataItem.hasOwnProperty(key)) {
-        xValues.push(key);
-        yValues.push(dataItem[key]);
-        barColors.push('rgba(0, 119, 204, 0.3)'); 
-    }
-  }
-  
- //var ctx = document.getElementById('myChart').getContext('2d');
-  new Chart("myChart", {
-  type: "bar",
-  data: {
-    labels: xValues,
-    datasets: [{
-      backgroundColor: barColors,
-      data: yValues
-    }]
-  },
-  options: {
-    title: {
-      display: true,
-      text: "Beispiel"
-    }
-  }
-});
-}
+        const formData = new FormData(document.getElementById('dynamicForm'));
 
-document.getElementById('dynamicForm').addEventListener('submit', submitForm);
-</script>
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "../backend/storeData.php", true);
 
-</body>
+        xhr.onreadystatechange = function() {
+          if (this.readyState == 4){ 
+            if (this.status == 200) {
+
+              document.getElementById("getVal").innerHTML= this.responseText;
+              // alert("Data stored successfully");
+              console.log("Data stored",this.responseText);
+              drawChart(xhr.responseText);    
+            }else {
+              console.log("error by status");
+            }
+          }
+        };
+        xhr.send(formData);
+      }
+
+
+
+      function drawChart(data){
+
+        var dataM = JSON.parse(data);
+        console.log("Output : ",dataM);
+        var responseData = dataM;
+
+        var xValues = [];
+        var yValues = [];
+        var barColors = ["red", "green","blue","orange","brown","black"];
+
+
+        if (Array.isArray(responseData)) {
+          responseData.forEach(item => {
+            if (item.x && item.y) { // check if the both of items exit
+              xValues.push(item.x);
+              yValues.push(item.y);
+            }
+          });
+        }
+
+        const verkehrsmittelSelect = document.getElementById('verkehrsmittel');
+        const verkehrsmittel = verkehrsmittelSelect.value;
+
+        const userGroupSelect = document.getElementById('userGroup');
+        const userGroup = userGroupSelect.value;
+
+        var ctx = document.getElementById('myChart').getContext('2d');
+        new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: xValues,
+            datasets: [{
+              backgroundColor: barColors,
+              data: yValues
+            }]
+          },
+          options: {
+            title: {
+              display: true,
+              text: userGroup+ " - "+verkehrsmittel
+            }
+          }
+        });
+      }
+
+
+      document.getElementById('dynamicForm').addEventListener('submit', submitForm);
+    </script>
+
+  </body>
 </html>
 
