@@ -1,5 +1,5 @@
 <?php
-header('Content-Type: application/json');
+//header('Content-Type: application/json');
 
 $servername = "mysql-server";
 $username = "knzilewis";
@@ -50,9 +50,9 @@ $stmt->bind_param("sssssssssssssss", $verkehrsmittel, $userGroup, $zufuss, $fahr
 
 // Execute the request
 if ($stmt->execute()) {
-  echo "Daten erfolgreich in die Datenbank eingefügt";
+ // echo "Daten erfolgreich in die Datenbank eingefügt";
 } else {
-  echo "Fehler beim Einfügen der Daten: " . $stmt->error;
+ // echo "Fehler beim Einfügen der Daten: " . $stmt->error;
 }
 
 
@@ -69,28 +69,33 @@ if ($userGroup === 'Alle' && $verkehrsmittel === 'Täglicher Weg zur Hochschule'
   $req = "SELECT eigenesfahrrad AS 'Eigenes-PKW', dienstpkw AS 'Dienst-PKW', schiff AS 'Schiff', bus AS 'Bus', bahn AS 'Bahn', flugzeug AS 'Flugzeug' FROM Verkehrsmittel ORDER BY id DESC LIMIT 1;";
 }
 
+if (!empty($req)) {
+    $result = $conn->query($req);
 
-if(!empty($req)){
-  $result= $conn->query($req);
+    // create an empty array
+    $data = array();
 
-  // create an empty array
-  $data = [];
+    while ($row = $result->fetch_assoc()) {
 
-  if($result->num_rows >0){
-    while($rows = $result->fetch_assoc()){
-      $data[] = $rows;
+        foreach ($row as $key => $value) {
+            // Convert the key to lowercase -- nice to have --
+            $newKey = strtolower($key);
+
+            // Check if the value is numeric and convert if necessary (solution from stackoverflow #id56389)
+            $newValue = is_numeric($value) ? floatval($value) : $value;
+
+            
+            // and add this object directly to $data array
+            $data[] = ['x' => $newKey, 'y' => $newValue];
+    }
+ 
+    //  $data[] = $row;
     }
 
     echo json_encode($data);
-
-  } 
-  else {
-    echo json_encode(['error' => 'Keine Ergebnisse gefunden']);
-    }
 } else {
-  echo json_encode(['error' => 'Keine Parameter']);
+    echo json_encode(['error' => 'Keine Ergebnisse gefunden']);
 }
-
 
 $conn->close();
 ?>
